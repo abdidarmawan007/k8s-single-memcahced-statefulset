@@ -1,0 +1,47 @@
+## NOTE: run with statefulset ##
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dev-memcached
+spec:
+  selector:
+    matchLabels:
+      app: dev-memcached
+  serviceName: dev-memcached
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dev-memcached
+    spec:
+      containers:
+        - name: dev-memcached
+          image: gcr.io/cloud-marketplace/google/memcached:1.5
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 11211
+              name: dev-memcached
+              protocol: TCP
+          resources:
+              requests:
+                 cpu: "80m"
+                 memory: "80Mi"
+              limits:
+                 cpu: "500m"
+                 memory: "600Mi"       
+---
+### Config Service Memcached ###
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-memcached
+  labels:
+    app: dev-memcached
+spec:
+  type: ClusterIP
+  ports:
+    - port: 11211
+      targetPort: 11211
+      protocol: TCP
+  selector:
+    app: dev-memcached
